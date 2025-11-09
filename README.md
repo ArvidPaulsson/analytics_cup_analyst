@@ -46,18 +46,89 @@ _⚠️ Not adhering to these submission rules and the [**Analytics Cup Rules**]
 ## Analyst Track Abstract Template (max. 300 words)
 #### Introduction
 
+The Phase of Play Transition Analyzer is a comprehensive analytical tool designed to help football coaches and analysts understand tactical patterns through the analysis of phase transitions in matches. By leveraging SkillCorner's phases of play data, the tool identifies how teams move through different tactical phases (create, build-up, finish, transition, etc.) and quantifies the effectiveness of these transitions in terms of goals and shots generated.
+
+The tool processes phases of play data directly from the SkillCorner Open Data repository, identifying transitions between phases within possessions, calculating success rates, and visualizing patterns through network diagrams, spatial heatmaps, and sequence analysis. This enables a data-driven understanding of tactical behaviors that goes beyond traditional event-based analysis.
+
 #### Usecase(s)
 
+1. **Tactical Analysis**: Coaches can identify which phase transitions are most effective for their team's playing style, helping them optimize their tactical approach and training focus.
+
+2. **Opposition Analysis**: Analysts can study opponent transition patterns to develop defensive strategies, identify vulnerabilities, and prepare match-specific game plans.
+
+3. **Player Development**: The tool helps coaches train players to recognize and execute successful transition sequences, improving tactical awareness and decision-making.
+
+4. **Performance Evaluation**: Teams can compare their transition patterns across matches, periods, and against different opponents to track tactical evolution and effectiveness.
+
+5. **Spatial Insights**: Understanding where on the pitch successful transitions occur helps teams design training sessions and tactical patterns that maximize goal-scoring opportunities.
+
 #### Potential Audience
+
+- **Football Coaches**: First-team coaches, academy coaches, and tactical analysts seeking to understand and improve team performance through phase transition analysis.
+
+- **Sports Analysts**: Professional analysts working with clubs, media, or betting companies who need to quantify and visualize tactical patterns.
+
+- **Performance Analysts**: Data scientists and analysts working in football who want to apply advanced analytics to phases of play data.
+
+- **Researchers**: Academics and researchers studying football tactics and team performance who need tools to analyze large datasets of match data.
 
 ---
 
 ## Video URL
 
+[Video URL to be added]
+
 ---
 
 ## Run Instructions
 
+### Prerequisites
+
+- Python 3.9 or higher
+- pip package manager
+
+### Installation
+
+1. Clone this repository:
+```bash
+git clone <repository-url>
+cd analytics_cup_analyst
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Jupyter Notebook
+
+1. Start Jupyter Notebook:
+```bash
+jupyter notebook
+```
+
+2. Open `submission.ipynb` and run all cells to see the analysis.
+
+### Running the Streamlit Web App
+
+1. Run the Streamlit application:
+```bash
+streamlit run main.py
+```
+
+2. The app will open in your default web browser at `http://localhost:8501`
+
+3. Use the sidebar to:
+   - Select matches to analyze
+   - Apply filters (phase types, periods, outcomes, teams)
+   - Navigate between different analysis views
+
+### Data Loading
+
+The tool loads data directly from the SkillCorner Open Data GitHub repository. No local data files are required. The first run may take a few moments to download the data.
+
 ---
 
 ## [Optional] URL to Web App / Website
+
+[Web App URL to be added if deployed]
