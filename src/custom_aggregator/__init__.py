@@ -1,31 +1,27 @@
 """
-Analytics Cup analyst toolkit.
+Declarative tooling for building custom dynamic-event aggregates.
 
-Primary exports:
-    - ``AggregatorConfig`` and related models for configuring custom aggregates.
-    - ``CustomAggregationTool`` orchestrator for building aggregates.
+Exposes the primary orchestration class (`CustomAggregationTool`) together with
+configuration models so analysts can script or configure bespoke aggregation
+workflows.
 """
 
-from .custom_aggregator import (
+from .aggregator import CustomAggregationTool
+from .config import (
     AggregatorConfig,
-    ColumnFilter,
     ContextDefinition,
     ContextGroupConfig,
-    CustomAggregationTool,
     MetricDefinition,
     MetricGroupConfig,
-    OutputConfig,
     TrackingMergeConfig,
 )
 
 __all__ = [
     "AggregatorConfig",
-    "ColumnFilter",
     "ContextDefinition",
     "ContextGroupConfig",
     "CustomAggregationTool",
     "MetricDefinition",
     "MetricGroupConfig",
-    "OutputConfig",
     "TrackingMergeConfig",
 ]
