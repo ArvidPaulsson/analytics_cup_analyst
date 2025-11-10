@@ -58,21 +58,21 @@ if len(pressing_dataset["pressing_with_phases"]) > 0:
     print(f"\nPressing metrics by defensive phase type:")
     if len(pressing_metrics) > 0:
         # Select only columns that exist
-        available_cols = [
+        base_cols = [
+            "phase_team_out_of_possession_phase_type",
+            "total_pressing_events",
+            "possession_loss_rate",
+            "shot_rate",
+            "avg_duration",
+        ]
+        team_cols = [
             col
-            for col in [
-                "phase_team_out_of_possession_phase_type",
-                "team_id",
-                "team_shortname",
-                "total_pressing_events",
-                "possession_loss_rate",
-                "shot_rate",
-                "avg_duration",
-            ]
+            for col in ["team_id", "team_shortname", "team_name"]
             if col in pressing_metrics.columns
         ]
+        available_cols = [col for col in team_cols + base_cols if col in pressing_metrics.columns]
         if available_cols:
-            print(pressing_metrics[available_cols].to_string())
+            print(pressing_metrics[available_cols].to_string(index=False))
         else:
             print("No matching columns found. Available columns:")
             print(pressing_metrics.columns.tolist())
@@ -85,33 +85,47 @@ if len(pressing_dataset["pressing_with_phases"]) > 0:
         pressing_dataset["pressing_with_phases"]
     )
     print(f"\nPressing metrics by subtype and defensive phase:")
-    print(
-        subtype_metrics[
-            [
-                "event_subtype",
-                "phase_team_out_of_possession_phase_type",
-                "total_events",
-                "possession_loss_rate",
-            ]
+    if len(subtype_metrics) > 0:
+        base_cols = [
+            "event_subtype",
+            "phase_team_out_of_possession_phase_type",
+            "total_events",
+            "possession_loss_rate",
         ]
-        .head(10)
-        .to_string()
-    )
+        team_cols = [
+            col
+            for col in ["team_id", "team_shortname", "team_name"]
+            if col in subtype_metrics.columns
+        ]
+        available_cols = [col for col in team_cols + base_cols if col in subtype_metrics.columns]
+        if available_cols:
+            print(subtype_metrics[available_cols].head(10).to_string(index=False))
+        else:
+            print("No matching columns found. Available columns:")
+            print(subtype_metrics.columns.tolist())
 
 # Example 4d: Calculate pressing effectiveness score
 if len(pressing_dataset["pressing_with_phases"]) > 0:
     effectiveness = get_pressing_effectiveness_score(pressing_metrics)
     print(f"\nPressing effectiveness by defensive phase type:")
-    print(
-        effectiveness[
-            [
-                "phase_team_out_of_possession_phase_type",
-                "pressing_effectiveness_score",
-                "possession_loss_rate",
-                "danger_stopped_rate",
-            ]
-        ].to_string()
-    )
+    if len(effectiveness) > 0:
+        base_cols = [
+            "phase_team_out_of_possession_phase_type",
+            "pressing_effectiveness_score",
+            "possession_loss_rate",
+            "danger_stopped_rate",
+        ]
+        team_cols = [
+            col
+            for col in ["team_id", "team_shortname", "team_name"]
+            if col in effectiveness.columns
+        ]
+        available_cols = [col for col in team_cols + base_cols if col in effectiveness.columns]
+        if available_cols:
+            print(effectiveness[available_cols].to_string(index=False))
+        else:
+            print("No matching columns found. Available columns:")
+            print(effectiveness.columns.tolist())
 
 # Example 5: Load and preprocess tracking data (Kloppy only)
 if not KLOPPY_AVAILABLE:
