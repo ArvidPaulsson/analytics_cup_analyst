@@ -13,6 +13,8 @@ from .data_loader import TrackingDataLoader
 from .zone_calculator import ZoneConfig, ZoneCalculator
 from .visualizer import ZoneVisualizer
 from .interactive_viewer import InteractiveZoneViewer
+from .visualizer_plotly import ZoneVisualizerPlotly
+from .interactive_viewer_plotly import InteractiveZoneViewerPlotly
 
 
 class ZoneLayer:
@@ -45,10 +47,14 @@ class ZoneLayer:
         # Load data
         self._load_data(use_kloppy)
 
-        # Initialize visualizer
+        # Initialize visualizer (default to matplotlib, can be switched to Plotly)
         pitch_length = self.match_metadata.get("pitch_length", 105.0)
         pitch_width = self.match_metadata.get("pitch_width", 68.0)
         self.visualizer = ZoneVisualizer(
+            pitch_length=pitch_length,
+            pitch_width=pitch_width,
+        )
+        self.visualizer_plotly = ZoneVisualizerPlotly(
             pitch_length=pitch_length,
             pitch_width=pitch_width,
         )
@@ -216,15 +222,168 @@ class ZoneLayer:
         else:
             plt.show()
 
-    def launch_interactive(self) -> None:
-        """Launch interactive viewer."""
-        viewer = InteractiveZoneViewer(
-            tracking_data=self.tracking_data,
-            match_metadata=self.match_metadata,
-            dynamic_events=self.dynamic_events,
-            zone_config=self.zone_config,
-        )
+    def launch_interactive(self, use_plotly: bool = False) -> None:
+        """
+        Launch interactive viewer.
+
+        Args:
+            use_plotly: If True, use Plotly-based viewer (for Jupyter notebooks).
+                        If False, use matplotlib-based viewer.
+        """
+        if use_plotly:
+            viewer = InteractiveZoneViewerPlotly(
+                tracking_data=self.tracking_data,
+                match_metadata=self.match_metadata,
+                dynamic_events=self.dynamic_events,
+                zone_config=self.zone_config,
+            )
+        else:
+            viewer = InteractiveZoneViewer(
+                tracking_data=self.tracking_data,
+                match_metadata=self.match_metadata,
+                dynamic_events=self.dynamic_events,
+                zone_config=self.zone_config,
+            )
         viewer.launch()
+
+    def visualize_frame_plotly(
+        self,
+        frame: int,
+        show_overlays: bool = True,
+        show_labels: bool = True,
+        show_zone_boundaries: bool = True,
+    ):
+        """
+        Visualize a single frame using Plotly (for Jupyter notebooks).
+
+        Args:
+            frame: Frame number to visualize
+            show_overlays: Whether to show zone overlays
+            show_labels: Whether to show player labels
+            show_zone_boundaries: Whether to show zone boundaries
+
+        Returns:
+            Plotly figure object
+        """
+
+        # Get frame data
+        frame_data = self.data_loader.get_frame_data(
+            self.tracking_data,
+            frame,
+            self.match_metadata,
+        )
+
+        # Determine attacking direction
+        period = (
+            self.tracking_data[self.tracking_data["frame"] == frame]["period_id"].iloc[
+                0
+            ]
+            if not self.tracking_data[self.tracking_data["frame"] == frame].empty
+            else 1
+        )
+
+        attacking_direction = self.data_loader.get_attacking_direction(
+            self.match_metadata,
+            period,
+        )
+
+        # Get ball carrier movement direction
+        ball_carrier_movement_dir = None
+        ball_carrier_pos = None
+        if frame_data["ball_carrier_id"]:
+            for player in frame_data["players"]:
+                if player["player_id"] == frame_data["ball_carrier_id"]:
+                    ball_carrier_pos = (player["x"], player["y"])
+                    # Get movement direction from player data (velocity from kloppy)
+                    if player.get("direction") is not None:
+                        direction = player["direction"]
+                        # Convert from degrees to radians if needed
+                        if abs(direction) > 2 * np.pi:
+                            ball_carrier_movement_dir = np.deg2rad(direction)
+                        else:
+                            ball_carrier_movement_dir = direction
+                    break
+
+            # Always try to calculate from position differences as fallback or verification
+            # This ensures we have movement direction even when velocity data is missing
+            if ball_carrier_pos is not None:
+                movement_data = self.data_loader.get_ball_carrier_movement(
+                    self.tracking_data,
+                    frame,
+                    lookback_frames=5,
+                )
+                if movement_data and movement_data.get("direction") is not None:
+                    # Use calculated direction (more reliable for visualization)
+                    # Velocity data might be None or inaccurate
+                    ball_carrier_movement_dir = movement_data["direction"]
+
+        # Calculate zones
+        zone_assignments = self.zone_calculator.calculate_zones(
+            ball_position=frame_data["ball_position"],
+            ball_carrier_id=frame_data["ball_carrier_id"],
+            players=frame_data["players"],
+            attacking_direction=attacking_direction,
+            ball_movement_direction=ball_carrier_movement_dir,
+        )
+
+        # Get zone boundaries
+        zone_boundaries = None
+        if ball_carrier_pos:
+            zone_boundaries = self.zone_calculator.get_zone_boundaries(
+                ball_carrier_pos,
+                attacking_direction,
+                ball_movement_direction=ball_carrier_movement_dir,
+            )
+
+        # Get player metadata
+        player_metadata = self._get_player_metadata()
+
+        # Get event info
+        event_info = self._get_event_info(frame)
+
+        # Get trajectory data for ball carrier
+        trajectory_data = None
+        if show_overlays and frame_data["ball_carrier_id"]:
+            trajectory_data = self._get_trajectory_data(
+                frame, frame_data["ball_carrier_id"]
+            )
+
+        # Create Plotly figure
+        timestamp = (
+            self.tracking_data[self.tracking_data["frame"] == frame]["timestamp"].iloc[
+                0
+            ]
+            if not self.tracking_data[self.tracking_data["frame"] == frame].empty
+            else None
+        )
+
+        fig = self.visualizer_plotly.create_pitch_figure(
+            title=f"Frame {frame}",
+        )
+
+        # Plot frame
+        self.visualizer_plotly.plot_frame(
+            fig=fig,
+            frame_data=frame_data,
+            zone_assignments=zone_assignments,
+            show_overlays=show_overlays,
+            show_labels=show_labels,
+            show_zone_boundaries=show_zone_boundaries,
+            zone_boundaries=zone_boundaries,
+            player_metadata=player_metadata,
+            trajectory_data=trajectory_data,
+        )
+
+        # Add frame info
+        self.visualizer_plotly.add_frame_info(
+            fig,
+            frame,
+            timestamp,
+            period,
+            event_info,
+        )
+
+        return fig
 
     def _get_player_metadata(self) -> Dict:
         """Get player metadata from match metadata."""
@@ -269,6 +428,43 @@ class ZoneLayer:
                 event_strs.append(event_type)
 
         return " | ".join(event_strs)
+
+    def _get_trajectory_data(
+        self, frame: int, ball_carrier_id: Optional[int]
+    ) -> Optional[Dict]:
+        """
+        Get trajectory data for ball carrier over previous frames.
+
+        Args:
+            frame: Current frame
+            ball_carrier_id: Ball carrier player ID
+
+        Returns:
+            Dictionary with 'x' and 'y' lists of positions, or None
+        """
+        if ball_carrier_id is None:
+            return None
+
+        # Get frames in trajectory window
+        min_frame = self.tracking_data["frame"].min()
+        start_frame = max(frame - 30, min_frame)
+        trajectory_frames = self.tracking_data[
+            (self.tracking_data["frame"] >= start_frame)
+            & (self.tracking_data["frame"] <= frame)
+            & (self.tracking_data["player_id"] == ball_carrier_id)
+        ].sort_values("frame")
+
+        if trajectory_frames.empty:
+            return None
+
+        # Extract positions
+        x_positions = trajectory_frames["x"].tolist()
+        y_positions = trajectory_frames["y"].tolist()
+
+        return {
+            "x": x_positions,
+            "y": y_positions,
+        }
 
     def update_zone_config(self, config: ZoneConfig) -> None:
         """Update zone configuration."""

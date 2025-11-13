@@ -12,6 +12,8 @@ from .zone_calculator import ZoneConfig, ZoneCalculator
 from .data_loader import TrackingDataLoader
 from .visualizer import ZoneVisualizer
 from .interactive_viewer import InteractiveZoneViewer
+from .visualizer_plotly import ZoneVisualizerPlotly
+from .interactive_viewer_plotly import InteractiveZoneViewerPlotly
 
 __all__ = [
     "ZoneLayer",
@@ -20,5 +22,7 @@ __all__ = [
     "TrackingDataLoader",
     "ZoneVisualizer",
     "InteractiveZoneViewer",
+    "ZoneVisualizerPlotly",
+    "InteractiveZoneViewerPlotly",
 ]
 
