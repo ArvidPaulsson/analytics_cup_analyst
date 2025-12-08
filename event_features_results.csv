@@ -1,0 +1,9 @@
+player_id,match_id,carries_count,carries_distance,passes_into_space,pressures,progressive_actions,pressing_count,pressure_count,recovery_press_count,counter_press_count,off_ball_runs_count,off_ball_runs_behind,off_ball_runs_coming_short,off_ball_runs_cross_receiver,off_ball_runs_overlap,off_ball_runs_run_ahead,off_ball_runs_support,off_ball_runs_underlap,passing_options_count,passing_options_targeted,passing_options_received
+23418,1886347,23,224.65999999999997,56,54,0,20,10,16,8,48,1,14,0,2,11,7,6,152,43,40
+50951,1886347,17,149.17000000000002,31,40,0,15,7,10,8,38,4,4,7,1,9,5,0,138,37,28
+14736,1886347,32,276.96,65,34,1,10,9,12,3,29,0,9,1,0,3,7,3,128,27,25
+50978,1886347,17,136.54,38,33,2,6,11,11,5,30,0,22,0,0,4,3,0,118,30,26
+735574,1886347,20,114.74000000000001,49,28,0,6,12,9,1,20,0,13,1,1,3,1,0,118,32,32
+735573,1886347,10,72.84,19,56,0,16,14,20,6,49,5,4,2,0,14,7,2,127,31,25
+795505,1886347,18,187.98,17,61,4,15,30,13,3,36,5,5,1,0,12,6,0,107,38,28
+795507,1886347,6,39.879999999999995,12,53,1,22,14,9,8,22,1,5,2,0,7,4,0,78,18,10
